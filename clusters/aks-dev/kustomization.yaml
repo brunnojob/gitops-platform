@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../projects/platform-infra.yaml
+  - ../../infrastructure/sealed-secrets/application.yaml
+  - ../../infrastructure/argo-rollouts/application.yaml
+  - ../../rbac/argocd-rbac-cm.yaml
