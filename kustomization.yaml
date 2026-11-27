@@ -7,6 +7,7 @@ resources:
   - infrastructure/sealed-secrets/application.yaml
   - infrastructure/argo-rollouts/application.yaml
   - infrastructure/monitoring/argocd-servicemonitor.yaml
+  - infrastructure/workload-guardrails.yaml
   - appsets/workloads-appset.yaml
   - rbac/argocd-rbac-cm.yaml
   - rbac/argocd-notifications-cm.yaml

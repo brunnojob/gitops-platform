@@ -39,6 +39,7 @@ flowchart TB
 | --- | --- |
 | Bootstrap | Helm fixa o chart do Argo CD; a aplicação raiz inicia a reconciliação. |
 | AppProjects | Repositórios e namespaces permitidos; workloads sem recursos privilegiados. |
+| Guardrails | Namespaces com Pod Security `restricted` e rede negada por padrão, com entrada apenas do Ingress NGINX; exceção limitada para o solver HTTP-01 do cert-manager. |
 | ApplicationSet | Descobre `workloads/*/overlays/*` automaticamente. |
 | Rollouts | Tráfego canary em 10%, 30%, 60% e 100% via Ingress NGINX. |
 | AnalysisTemplate | Consulta HTTP 5xx no Prometheus e aborta canary acima de 5%. |
@@ -100,7 +101,7 @@ Um rollback manual é temporário com `selfHeal`; reverta a alteração no Git p
 
 ## Segurança
 
-O perfil `deployer` sincroniza apenas `dev` e `staging`. Produção exige o perfil `admin` ou mudança revisada no Git; o controller ainda reconcilia automaticamente o estado aprovado. O projeto de workloads limita os namespaces e bloqueia recursos de RBAC e segredos em texto puro. A chave de Sealed Secrets precisa de backup externo seguro.
+O perfil `deployer` sincroniza apenas `dev` e `staging`. Produção exige o perfil `admin` ou mudança revisada no Git; o controller ainda reconcilia automaticamente o estado aprovado. O projeto de workloads limita os namespaces e bloqueia recursos de RBAC e segredos em texto puro. A chave de Sealed Secrets precisa de backup externo seguro. As `NetworkPolicy` pressupõem que o controlador Ingress rode no namespace `ingress-nginx` e que o CNI aplique políticas de rede; ajuste o namespace se a sua instalação diferir.
 
 <details>
 <summary><strong>Criar um SealedSecret para staging</strong></summary>
@@ -123,9 +124,8 @@ Para sincronizar este recurso por Argo CD, autorize `SealedSecret` no AppProject
 
 ## Limites operacionais
 
-Esta publicação é infraestrutura **como código**, não uma instalação ativa. Antes de produção, valide os charts fixados com a API do seu cluster, as labels do Ingress NGINX usadas pela análise, políticas de rede, backup da chave do Sealed Secrets, disponibilidade do Redis HA e do Prometheus, SSO e regras de revisão da branch `main`. O exemplo `sample-api` usa NGINX sem dados de negócio.
+Esta publicação é infraestrutura **como código**, não uma instalação ativa. Antes de produção, valide os charts fixados com a API do seu cluster, as labels do Ingress NGINX usadas pela análise, suporte do CNI a políticas de rede, backup da chave do Sealed Secrets, disponibilidade do Redis HA e do Prometheus, SSO e regras de revisão da branch `main`. A análise inicia no primeiro passo e permanece ativa até o fim do canary; sem métricas suficientes a promoção deve ser investigada antes de liberar tráfego. O exemplo `sample-api` usa NGINX sem dados de negócio.
 
 ## Licença
 
 [MIT](LICENSE) © 2026 brunnodev.
-

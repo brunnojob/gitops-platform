@@ -9,7 +9,7 @@ spec:
     - name: http-5xx-rate
       interval: 1m
       initialDelay: 1m
-      count: 5
+      count: 0
       failureLimit: 1
       inconclusiveLimit: 2
       successCondition: result[0] <= 0.05
