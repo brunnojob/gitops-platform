@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: workloads
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  goTemplate: true
+  goTemplateOptions: [missingkey=error]
+  generators:
+    - git:
+        repoURL: https://github.com/brunnojob/gitops-platform.git
+        revision: main
+        directories:
+          - path: workloads/*/overlays/*
+  template:
+    metadata:
+      name: '{{ index .path.segments 1 }}-{{ .path.basenameNormalized }}'
+      labels:
+        app.kubernetes.io/part-of: gitops-platform
+        environment: '{{ .path.basenameNormalized }}'
+    spec:
+      project: workloads-prod
+      source:
+        repoURL: https://github.com/brunnojob/gitops-platform.git
+        targetRevision: main
+        path: '{{ .path.path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ index .path.segments 1 }}-{{ .path.basenameNormalized }}'
+      syncPolicy:
+        automated: {prune: true, selfHeal: true}
+        retry:
+          limit: 5
+          backoff: {duration: 5s, factor: 2, maxDuration: 3m}
+        syncOptions: [CreateNamespace=true, ServerSideApply=true]

@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - bootstrap/root-app.yaml
+  - projects/platform-infra.yaml
+  - projects/workloads-prod.yaml
+  - infrastructure/sealed-secrets/application.yaml
+  - infrastructure/argo-rollouts/application.yaml
+  - infrastructure/monitoring/argocd-servicemonitor.yaml
+  - appsets/workloads-appset.yaml
+  - rbac/argocd-rbac-cm.yaml
+  - rbac/argocd-notifications-cm.yaml

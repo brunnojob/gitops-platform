@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: sample-api-http-error-rate
+spec:
+  args:
+    - name: namespace
+  metrics:
+    - name: http-5xx-rate
+      interval: 1m
+      initialDelay: 1m
+      count: 5
+      failureLimit: 1
+      inconclusiveLimit: 2
+      successCondition: result[0] <= 0.05
+      failureCondition: result[0] > 0.05
+      provider:
+        prometheus:
+          address: http://prometheus-operated.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(nginx_ingress_controller_requests{namespace="{{args.namespace}}",ingress=~"sample-api.*",status=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(nginx_ingress_controller_requests{namespace="{{args.namespace}}",ingress=~"sample-api.*"}[5m])), 0.001)

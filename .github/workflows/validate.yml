@@ -1,0 +1,31 @@
+name: Validate manifests
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4.3.1
+        with:
+          version: v3.17.3
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.4
+      - name: Render Kustomize
+        run: |
+          kubectl kustomize . > /tmp/root.yaml
+          for env in dev staging prod; do
+            kubectl kustomize "workloads/sample-api/overlays/${env}" > "/tmp/${env}.yaml"
+          done
+      - name: Render pinned Argo CD chart
+        run: |
+          helm repo add argo https://argoproj.github.io/argo-helm
+          helm repo update
+          helm template argocd argo/argo-cd --version 10.19.1 -n argocd -f bootstrap/values-argocd.yaml > /tmp/argocd.yaml
+      - name: Check Bash syntax
+        run: bash -n scripts/bootstrap.sh

@@ -1,0 +1,69 @@
+global:
+  domain: argocd.platform.example.org
+  logging:
+    format: json
+    level: info
+crds:
+  install: true
+  keep: true
+configs:
+  cm:
+    create: true
+    url: https://argocd.platform.example.org
+    admin.enabled: "true"
+    exec.enabled: "false"
+    application.resourceTrackingMethod: annotation
+  params:
+    create: true
+    server.insecure: "true"
+  rbac:
+    create: false
+controller:
+  replicas: 2
+  resources:
+    requests: {cpu: 250m, memory: 512Mi}
+    limits: {memory: 2Gi}
+  metrics:
+    enabled: true
+    service:
+      enabled: true
+server:
+  replicas: 2
+  resources:
+    requests: {cpu: 100m, memory: 256Mi}
+    limits: {memory: 1Gi}
+  metrics:
+    enabled: true
+    service:
+      enabled: true
+  ingress:
+    enabled: true
+    controller: generic
+    ingressClassName: nginx
+    hostname: argocd.platform.example.org
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-production
+      nginx.ingress.kubernetes.io/backend-protocol: HTTP
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    tls: true
+repoServer:
+  replicas: 2
+  resources:
+    requests: {cpu: 250m, memory: 256Mi}
+    limits: {memory: 1Gi}
+  metrics:
+    enabled: true
+    service:
+      enabled: true
+applicationSet:
+  replicas: 2
+notifications:
+  enabled: true
+  cm:
+    create: false
+redis:
+  enabled: false
+redis-ha:
+  enabled: true
+  haproxy:
+    enabled: true
