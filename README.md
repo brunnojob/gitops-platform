@@ -127,4 +127,5 @@ Esta publicação é infraestrutura **como código**, não uma instalação ativ
 
 ## Licença
 
-[MIT](LICENSE) © 2026 Brunno da Costa da Silveira.
+[MIT](LICENSE) © 2026 brunnodev.
+
